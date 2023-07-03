@@ -1,6 +1,6 @@
 #include "ufsm.h"
 
-uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, uint32_t init_state)
+uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, ufsm_state init_state)
 {
     cb->table = table;
     cb->table_size = table_size;
@@ -8,7 +8,7 @@ uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_siz
     return UFSM_OK;
 }
 
-uint32_t ufsm_recv(struct ufsm *cb, uint32_t event, void *data)
+uint32_t ufsm_recv(struct ufsm *cb, ufsm_event event, void *data)
 {
     ufsm_func func = NULL;
 
@@ -31,7 +31,7 @@ uint32_t ufsm_recv(struct ufsm *cb, uint32_t event, void *data)
     return UFSM_OK;
 }
 
-uint32_t ufsm_get_state(struct ufsm *cb)
+ufsm_state ufsm_get_state(struct ufsm *cb)
 {
     return cb->state;
 }

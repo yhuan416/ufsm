@@ -15,21 +15,21 @@ enum fsm_event {
     EVENT_MAX
 };
 
-uint32_t state_0(struct ufsm *cb, uint32_t event, void *data)
+static ufsm_state state_0(struct ufsm *cb, ufsm_event event, void *data)
 {
-    uint32_t state = STATE_1;
-    printf("state_0\n");
-    return state;
+    ufsm_state next_state = STATE_1;
+    printf("%s event:0x%x %p\n", __func__, event, data);
+    return next_state;
 }
 
-uint32_t state_1(struct ufsm *cb, uint32_t event, void *data)
+static ufsm_state state_1(struct ufsm *cb, ufsm_event event, void *data)
 {
-    uint32_t state = STATE_0;
-    printf("state_1\n");
-    return state;
+    ufsm_state next_state = STATE_0;
+    printf("%s event:0x%x %p\n", __func__, event, data);
+    return next_state;
 }
 
-struct ufsm_table table[] = {
+static struct ufsm_table table[] = {
     {STATE_0, EVENT_1, state_0},
     {STATE_1, EVENT_0, state_1},
 };

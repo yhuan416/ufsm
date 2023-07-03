@@ -11,13 +11,19 @@ struct ufsm;
 struct ufsm_table;
 
 /**
+ * @brief 状态机状态
+*/
+typedef uint32_t ufsm_state;
+typedef uint32_t ufsm_event;
+
+/**
  * @brief 状态机处理函数
  * @param cb 控制块指针
  * @param event 输入的事件
  * @param data 输入的数据
- * @return uint32_t 返回下一个状态
+ * @return ufsm_state 返回下一个状态
 */
-typedef uint32_t (*ufsm_func)(struct ufsm *cb, uint32_t event, void *data);
+typedef ufsm_state (*ufsm_func)(struct ufsm *cb, ufsm_event event, void *data);
 
 /**
  * @brief 状态机状态变迁表
@@ -27,8 +33,8 @@ typedef uint32_t (*ufsm_func)(struct ufsm *cb, uint32_t event, void *data);
 */
 struct ufsm_table
 {
-    uint32_t state; // 当前状态
-    uint32_t event; // 输入的事件
+    ufsm_state state; // 当前状态
+    ufsm_event event; // 输入的事件
     ufsm_func func; // 处理函数
 };
 
@@ -41,7 +47,7 @@ struct ufsm_table
 */
 struct ufsm
 {
-    volatile uint32_t state;
+    volatile ufsm_state state;
     struct ufsm_table *table;
     uint32_t table_size;
     void *data;
@@ -55,23 +61,23 @@ struct ufsm
  * @param init_state 初始状态
  * @return uint32_t 返回0表示成功，返回-1表示失败
 */
-uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, uint32_t init_state);
+uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, ufsm_state init_state);
 
 /**
  * @brief 状态机事件输入
  * @param cb 控制块指针
  * @param event 输入的事件
  * @param data 输入的数据
- * @return uint32_t 返回0表示成功，返回-1表示失败
+ * @return ufsm_state 返回0表示成功，返回-1表示失败
 */
-uint32_t ufsm_recv(struct ufsm *cb, uint32_t event, void *data);
+ufsm_state ufsm_recv(struct ufsm *cb, ufsm_event event, void *data);
 
 /**
  * @brief 获取当前状态
  * @param cb 控制块指针
- * @return uint32_t 返回当前状态
+ * @return ufsm_state 返回当前状态
 */
-uint32_t ufsm_get_state(struct ufsm *cb);
+ufsm_state ufsm_get_state(struct ufsm *cb);
 
 /**
  * @brief 设置用户数据
