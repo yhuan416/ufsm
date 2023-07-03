@@ -1,6 +1,23 @@
 #include "ufsm.h"
 
-uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, ufsm_state init_state)
+static ufsm_func _ufsm_get_func(struct ufsm_table *table, uint32_t table_size, ufsm_state state, ufsm_event event)
+{
+    uint32_t i = 0;
+    ufsm_func func = NULL;
+
+    for (i = 0; i < table_size; i++)
+    {
+        if (table[i].state == state && table[i].event == event)
+        {
+            func = table[i].func;
+            break;
+        }
+    }
+
+    return func;
+}
+
+ufsm_ret ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, ufsm_state init_state)
 {
     cb->table = table;
     cb->table_size = table_size;
@@ -8,19 +25,11 @@ uint32_t ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_siz
     return UFSM_OK;
 }
 
-uint32_t ufsm_recv(struct ufsm *cb, ufsm_event event, void *data)
+ufsm_ret ufsm_recv(struct ufsm *cb, ufsm_event event, void *data)
 {
     ufsm_func func = NULL;
 
-    for (uint32_t i = 0; i < cb->table_size; i++)
-    {
-        if (cb->table[i].state == cb->state && cb->table[i].event == event)
-        {
-            func = cb->table[i].func;
-            break;
-        }
-    }
-
+    func = _ufsm_get_func(cb->table, cb->table_size, cb->state, event);
     if (func == NULL)
     {
         return UFSM_FAIL;
