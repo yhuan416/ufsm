@@ -16,6 +16,8 @@ set(ufsm_include_dir include)
 if (UFSM_BUILD_STATIC)
     add_library(${ufsm_name} ${ufsm_src})
     target_include_directories(${ufsm_name} PUBLIC ${ufsm_include_dir})
+
+    install(TARGETS ${ufsm_name} DESTINATION lib)
 endif()
 
 # ufsm shared library
@@ -26,7 +28,11 @@ if (UFSM_BUILD_SHARED)
     target_include_directories(${ufsm_shared_name} PUBLIC ${ufsm_include_dir})
 
     set_target_properties(${ufsm_shared_name} PROPERTIES OUTPUT_NAME ${ufsm_name})
+
+    install(TARGETS ${ufsm_shared_name} DESTINATION lib)
 endif()
+
+install(DIRECTORY ${ufsm_include_dir}/ DESTINATION include)
 
 # ufsm test executable
 if (UFSM_BUILD_TESTS)
