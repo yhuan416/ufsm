@@ -7,6 +7,6 @@ mkdir -p build
 
 cd build
 
-cmake ..
+cmake .. -DUFSM_BUILD_TESTS=ON -DCMAKE_INSTALL_PREFIX=../install
 
 cmake --build .
