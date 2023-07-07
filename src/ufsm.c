@@ -17,25 +17,73 @@ static ufsm_func _ufsm_get_func(struct ufsm_table *table, uint32_t table_size, u
     return func;
 }
 
-ufsm_ret ufsm_init(struct ufsm *cb, struct ufsm_table *table, uint32_t table_size, ufsm_state init_state)
+static struct ufsm_table *_ufsm_get_table(struct ufsm_table *table, uint32_t table_size, ufsm_state state, ufsm_event event)
+{
+    uint32_t i = 0;
+    struct ufsm_table *t = NULL;
+
+    for (i = 0; i < table_size; i++)
+    {
+        if (table[i].state == state && table[i].event == event)
+        {
+            t = &(table[i]);
+            break;
+        }
+    }
+
+    return t;
+}
+
+ufsm_ret ufsm_init(struct ufsm *cb, 
+                    struct ufsm_table *table, 
+                    uint32_t table_size, 
+                    ufsm_state init_state,
+                    ufsm_exit_cb exit)
 {
     cb->table = table;
     cb->table_size = table_size;
     cb->state = init_state;
+
+    cb->exit_flag = 0;
+    cb->exit = exit;
+
     return UFSM_OK;
+}
+
+void ufsm_exit(struct ufsm *cb)
+{
+    cb->exit_flag = 1;
+
+    if (cb->exit != NULL)
+    {
+        cb->exit(cb, cb->state);
+    }
 }
 
 ufsm_ret ufsm_recv(struct ufsm *cb, ufsm_event event, void *data)
 {
-    ufsm_func func = NULL;
+    ufsm_ret ret = 0;
+    ufsm_state next_state = 0;
+    struct ufsm_table *table = NULL;
 
-    func = _ufsm_get_func(cb->table, cb->table_size, cb->state, event);
-    if (func == NULL)
+    if (cb->exit_flag)
     {
         return UFSM_FAIL;
     }
 
-    cb->state = func(cb, event, data);
+    table = _ufsm_get_table(cb->table, cb->table_size, cb->state, event);
+    if (table == NULL)
+    {
+        return UFSM_FAIL;
+    }
+
+    ret = table->func(cb, event, data);
+    if (ret != UFSM_OK)
+    {
+        return UFSM_FAIL;
+    }
+
+    cb->state = table->next_state;
 
     return UFSM_OK;
 }

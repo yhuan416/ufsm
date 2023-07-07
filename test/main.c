@@ -15,23 +15,26 @@ enum fsm_event {
     EVENT_MAX
 };
 
-static ufsm_state state_0(struct ufsm *cb, ufsm_event event, void *data)
+static ufsm_ret _state_0_recv_event_1_handle(struct ufsm *cb, ufsm_event event, void *data)
 {
-    ufsm_state next_state = STATE_1;
     printf("%s event:0x%x %p\n", __func__, event, data);
-    return next_state;
+    return UFSM_OK;
 }
 
-static ufsm_state state_1(struct ufsm *cb, ufsm_event event, void *data)
+static ufsm_ret _state_1_recv_event_0_handle(struct ufsm *cb, ufsm_event event, void *data)
 {
-    ufsm_state next_state = STATE_0;
     printf("%s event:0x%x %p\n", __func__, event, data);
-    return next_state;
+    return UFSM_OK;
+}
+
+static void ufsm_exit_handle(struct ufsm *cb, ufsm_state state)
+{
+    printf("%s state:0x%x\n", __func__, state);
 }
 
 static struct ufsm_table table[] = {
-    {STATE_0, EVENT_1, state_0},
-    {STATE_1, EVENT_0, state_1},
+    {STATE_0, EVENT_1, _state_0_recv_event_1_handle, STATE_1},
+    {STATE_1, EVENT_0, _state_1_recv_event_0_handle, STATE_0},
 };
 
 struct ufsm cb;
@@ -40,7 +43,7 @@ int main(int argc, char const *argv[])
 {
     uint32_t ret;
 
-    ret = ufsm_init(&cb, table, sizeof(table)/sizeof(table[0]), STATE_0);
+    ret = ufsm_init(&cb, table, sizeof(table)/sizeof(table[0]), STATE_0, ufsm_exit_handle);
     if (ret != UFSM_OK)
     {
         printf("ufsm_init failed\n");
@@ -60,6 +63,8 @@ int main(int argc, char const *argv[])
         printf("ufsm_recv failed\n");
         return -1;
     }
+
+    ufsm_exit(&cb);
 
     return 0;
 }
